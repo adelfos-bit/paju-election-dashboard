@@ -895,14 +895,18 @@ chartInstances['pollChart'] = new Chart(document.getElementById('pollChart'), {
   options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:55,ticks:{callback:v=>v+'%'}}}}
 });
 
-// 양자 가상대결 (2개 세트)
+// 양자 가상대결 (2개 세트 — 그룹형)
 chartInstances['vsChart'] = new Chart(document.getElementById('vsChart'), {
   type:'bar',
   data:{
-    labels:['김경일\nvs손배찬','손배찬','김경일\nvs이용욱','이용욱','기타/미정'],
-    datasets:[{label:'지지율(%)',data:[29.9,13.3,32.3,12.4,55.3],backgroundColor:['#1565c0','#42a5f5','#1565c0','#90caf9','#e0e0e0'],borderRadius:6}]
+    labels:['김경일 vs 손배찬','김경일 vs 이용욱'],
+    datasets:[
+      {label:'김경일',data:[29.9,32.3],backgroundColor:'#1565c0',borderRadius:6},
+      {label:'상대 후보',data:[13.3,12.4],backgroundColor:'#90caf9',borderRadius:6},
+      {label:'기타/미정',data:[56.8,55.3],backgroundColor:'#e0e0e0',borderRadius:6}
+    ]
   },
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:60,ticks:{callback:v=>v+'%'}}}}
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{max:60,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
 });
 
 // 소셜미디어 레이더

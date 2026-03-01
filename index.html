@@ -902,11 +902,11 @@ chartInstances['vsChart'] = new Chart(document.getElementById('vsChart'), {
     labels:['김경일 vs 손배찬','김경일 vs 이용욱'],
     datasets:[
       {label:'김경일',data:[29.9,32.3],backgroundColor:'#1565c0',borderRadius:6},
-      {label:'상대 후보',data:[13.3,12.4],backgroundColor:'#90caf9',borderRadius:6},
+      {label:'손배찬 / 이용욱',data:[13.3,12.4],backgroundColor:'#90caf9',borderRadius:6},
       {label:'기타/미정',data:[56.8,55.3],backgroundColor:'#e0e0e0',borderRadius:6}
     ]
   },
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{max:60,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(ctx){var names=['김경일','손배찬','이용욱'];if(ctx.datasetIndex===1){return (ctx.dataIndex===0?'손배찬':'이용욱')+': '+ctx.parsed.y+'%';}return ctx.dataset.label+': '+ctx.parsed.y+'%';}}}},scales:{y:{max:60,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
 });
 
 // 소셜미디어 레이더
@@ -975,6 +975,13 @@ loadDashboardData();
 
 // 5분마다 자동 갱신
 setInterval(loadDashboardData, 300000);
+
+// 모바일 가로↔세로 전환 시 차트 리사이즈
+window.addEventListener('resize', function() {
+  Object.values(chartInstances).forEach(function(c) {
+    if (c && c.resize) c.resize();
+  });
+});
 </script>
 
 </body>

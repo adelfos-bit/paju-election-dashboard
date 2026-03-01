@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 파주시장 선거 분석 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary: #1a237e;
+  --primary-light: #3949ab;
+  --accent: #00bcd4;
+  --accent2: #ff6f00;
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #212121;
+  --text-light: #757575;
+  --democrat: #004ea2;
+  --ppp: #e61e2b;
+  --progressive: #d32f2f;
+  --green: #2e7d32;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Malgun Gothic',sans-serif; background:var(--bg); color:var(--text); }
+.header { background:linear-gradient(135deg,var(--primary),var(--primary-light)); color:#fff; padding:20px 30px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.header h1 { font-size:1.5rem; }
+.header-info { display:flex; gap:20px; font-size:0.85rem; opacity:0.9; }
+.tabs { display:flex; background:#fff; border-bottom:2px solid #e0e0e0; padding:0 20px; overflow-x:auto; }
+.tab { padding:12px 20px; cursor:pointer; border-bottom:3px solid transparent; font-weight:500; white-space:nowrap; transition:all 0.2s; color:var(--text-light); }
+.tab:hover { color:var(--primary); background:#f5f5f5; }
+.tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:700; }
+.content { padding:20px; max-width:1400px; margin:0 auto; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+.grid { display:grid; gap:20px; }
+.grid-2 { grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); }
+.grid-3 { grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
+.grid-4 { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+.card { background:var(--card); border-radius:12px; padding:20px; box-shadow:var(--shadow); }
+.card h3 { margin-bottom:12px; font-size:1.05rem; display:flex; align-items:center; gap:8px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:20px; }
+.kpi { background:var(--card); border-radius:12px; padding:18px; box-shadow:var(--shadow); text-align:center; border-top:4px solid var(--primary); }
+.kpi .value { font-size:2rem; font-weight:800; color:var(--primary); }
+.kpi .label { font-size:0.85rem; color:var(--text-light); margin-top:4px; }
+.kpi .sub { font-size:0.75rem; color:var(--accent2); margin-top:4px; }
+.badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; }
+.badge-dem { background:#e3f2fd; color:var(--democrat); }
+.badge-ppp { background:#fce4ec; color:var(--ppp); }
+.badge-prog { background:#ffebee; color:var(--progressive); }
+.badge-new { background:#e8f5e9; color:var(--green); }
+.badge-urgent { background:#fff3e0; color:var(--accent2); }
+.badge-strategic { background:#e8eaf6; color:var(--primary); }
+.candidate-card { border-left:4px solid var(--democrat); padding:16px; margin-bottom:12px; background:#fafafa; border-radius:0 8px 8px 0; }
+.candidate-card.ppp { border-left-color:var(--ppp); }
+.candidate-card.prog { border-left-color:var(--progressive); }
+.candidate-card h4 { margin-bottom:6px; }
+.candidate-card .role { font-size:0.82rem; color:var(--text-light); }
+.policy-table { width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:12px; }
+.policy-table th { background:var(--primary); color:#fff; padding:10px; text-align:left; }
+.policy-table td { padding:10px; border-bottom:1px solid #eee; vertical-align:top; }
+.policy-table tr:hover { background:#f5f5f5; }
+.tag { display:inline-block; padding:3px 8px; border-radius:8px; font-size:0.72rem; margin:2px; font-weight:600; }
+.swot-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.swot-box { padding:16px; border-radius:10px; }
+.swot-box h4 { margin-bottom:8px; }
+.swot-s { background:#e8f5e9; border-left:4px solid #2e7d32; }
+.swot-w { background:#fff3e0; border-left:4px solid #e65100; }
+.swot-o { background:#e3f2fd; border-left:4px solid #1565c0; }
+.swot-t { background:#fce4ec; border-left:4px solid #c62828; }
+.swot-box ul { list-style:none; padding:0; }
+.swot-box li { padding:4px 0; font-size:0.88rem; }
+.swot-box li::before { content:'• '; font-weight:bold; }
+.chart-container { position:relative; height:350px; margin:10px 0; }
+.chart-sm { height:280px; }
+.insight-box { background:linear-gradient(135deg,#e8eaf6,#c5cae9); border-radius:12px; padding:20px; margin-top:16px; }
+.insight-box h4 { color:var(--primary); margin-bottom:10px; }
+.progress-bar { height:8px; background:#e0e0e0; border-radius:4px; overflow:hidden; margin:6px 0; }
+.progress-fill { height:100%; border-radius:4px; transition:width 0.5s; }
+.strategy-card { border-radius:10px; padding:16px; margin-bottom:12px; }
+.strategy-urgent { background:#fff3e0; border-left:4px solid #ff6f00; }
+.strategy-important { background:#e3f2fd; border-left:4px solid #1565c0; }
+.strategy-strategic { background:#e8f5e9; border-left:4px solid #2e7d32; }
+.sns-card { background:var(--card); border-radius:10px; padding:14px; text-align:center; box-shadow:var(--shadow); }
+.sns-card .platform { font-weight:700; font-size:0.95rem; margin-bottom:4px; }
+.sns-card .handle { font-size:0.8rem; color:var(--primary-light); word-break:break-all; }
+.sns-card .status { font-size:0.78rem; margin-top:6px; }
+.issue-list { list-style:none; }
+.issue-list li { padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; gap:10px; }
+.issue-num { background:var(--primary); color:#fff; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:0.82rem; font-weight:700; flex-shrink:0; }
+.timeline-item { display:flex; gap:16px; margin-bottom:16px; }
+.timeline-dot { width:16px; height:16px; border-radius:50%; background:var(--primary); flex-shrink:0; margin-top:4px; }
+.timeline-content { flex:1; }
+.timeline-date { font-size:0.78rem; color:var(--text-light); }
+.manifesto-card { background:var(--card); border-radius:12px; padding:16px; box-shadow:var(--shadow); border-top:3px solid var(--accent); margin-bottom:12px; }
+.manifesto-card h4 { color:var(--primary); margin-bottom:8px; }
+.manifesto-card .kpi-line { font-size:0.78rem; color:var(--accent2); margin-top:6px; font-weight:600; }
+.manifesto-card p { font-size:0.88rem; line-height:1.5; }
+@media (max-width:768px) {
+  .header { padding:14px; }
+  .header h1 { font-size:1.1rem; }
+  .grid-2,.grid-3 { grid-template-columns:1fr; }
+  .swot-grid { grid-template-columns:1fr; }
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .tab { padding:10px 14px; font-size:0.85rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>2026 파주시장 선거 분석 대시보드</h1>
+  <div class="header-info">
+    <span>업데이트: 2026.03.01</span>
+    <span>선거일: 2026.06.03 (D-94)</span>
+    <span>유권자 수: ~45만 명</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab(0)">종합 현황</div>
+  <div class="tab" onclick="showTab(1)">후보 비교</div>
+  <div class="tab" onclick="showTab(2)">여론조사</div>
+  <div class="tab" onclick="showTab(3)">소셜미디어</div>
+  <div class="tab" onclick="showTab(4)">뉴스/여론</div>
+  <div class="tab" onclick="showTab(5)">조성환 분석</div>
+  <div class="tab" onclick="showTab(6)">전략 제안</div>
+</div>
+
+<div class="content">
+
+<!-- =============== TAB 0: 종합 현황 =============== -->
+<div class="tab-panel active" id="tab0">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="value">54만+</div>
+      <div class="label">파주시 인구</div>
+      <div class="sub">2026.01 기준, 수도권 대표 성장도시</div>
+    </div>
+    <div class="kpi">
+      <div class="value">11+</div>
+      <div class="label">출마 예정 후보 수</div>
+      <div class="sub">민주 6 / 국힘 5+ / 진보 1</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--democrat);">
+      <div class="value" style="color:var(--democrat);">51.2%</div>
+      <div class="label">민주당 정당지지율</div>
+      <div class="sub">국힘 23.0% 대비 2배+</div>
+    </div>
+    <div class="kpi" style="border-top-color:var(--accent2);">
+      <div class="value" style="color:var(--accent2);">531표</div>
+      <div class="label">2022년 당락 표차</div>
+      <div class="sub">초접전 지역 (0.29%)</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>📊 정당 지지율 현황</h3>
+      <div class="chart-container chart-sm"><canvas id="partyChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>🗳️ 선거 구도 요약</h3>
+      <div style="margin:10px 0;">
+        <strong>핵심 구도</strong>
+        <p style="margin:8px 0;font-size:0.9rem;">"<strong>재선의 유리함</strong>(김경일 현 시장) vs <strong>변화의 요구</strong>(민주 경선 도전자들) vs <strong>정권교체</strong>(국민의힘)"</p>
+        <p style="font-size:0.85rem;color:var(--accent2);font-weight:600;">경기도의원 4자 구도: 민주 이용욱·조성환 vs 국힘 고준호·안명규 (사직 시한 3.5)</p>
+      </div>
+      <div style="margin-top:16px;">
+        <strong>파주시 5대 현안</strong>
+        <ol style="padding-left:20px;margin-top:8px;font-size:0.88rem;line-height:1.8;">
+          <li><strong>종합병원 전무</strong> — 53만 인구 의료 사각지대</li>
+          <li><strong>GTX-A 연계교통</strong> — 북부권역 40분 배차</li>
+          <li><strong>신도심-원도심 양극화</strong> — 운정 57.5% 집중</li>
+          <li><strong>군사시설보호구역 규제</strong> — 개발 제한</li>
+          <li><strong>상수도 인프라 취약</strong> — 2025.11 대규모 단수</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-box" style="margin-top:20px;">
+    <h4>💡 조성환 후보 핵심 인사이트</h4>
+    <div class="grid grid-3" style="margin-top:12px;">
+      <div>
+        <strong style="color:#2e7d32;">강점</strong>
+        <ul style="list-style:none;padding:0;margin-top:6px;font-size:0.88rem;line-height:1.7;">
+          <li>• 매니페스토 13대 정책 체계화</li>
+          <li>• 기획재정위원장 (도 예산 40조 총괄)</li>
+          <li>• AI·블록체인 디지털 전환 비전</li>
+          <li>• 이재명 정부 국정과제 연동</li>
+        </ul>
+      </div>
+      <div>
+        <strong style="color:#e65100;">약점</strong>
+        <ul style="list-style:none;padding:0;margin-top:6px;font-size:0.88rem;line-height:1.7;">
+          <li>• 여론조사 상위권 미진입</li>
+          <li>• 현 시장 대비 인지도 열세</li>
+          <li>• 소셜미디어 팔로워 확보 필요</li>
+          <li>• 정책 체감도 홍보 부족</li>
+        </ul>
+      </div>
+      <div>
+        <strong style="color:#1565c0;">기회</strong>
+        <ul style="list-style:none;padding:0;margin-top:6px;font-size:0.88rem;line-height:1.7;">
+          <li>• <strong>출마 대열 합류 확정 (2.19)</strong></li>
+          <li>• 도의원 4자 구도 중 '실무현장형'</li>
+          <li>• 13대 정책 차별화 + 국정과제 시너지</li>
+          <li>• 운정 젊은 유권자 + 세대교체 수요</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== TAB 1: 후보 비교 =============== -->
+<div class="tab-panel" id="tab1">
+  <div class="grid grid-2">
+    <div class="card">
+      <h3><span class="badge badge-dem">더불어민주당</span> 후보군</h3>
+      <div class="candidate-card">
+        <h4>김경일 <span style="font-size:0.8rem;color:var(--text-light);">(현 시장, 재선 도전)</span></h4>
+        <div class="role">민선 8기 파주시장 | 적합도 25% (1위)</div>
+        <p style="font-size:0.83rem;margin-top:6px;">슬로건: '민생 온(溫), 기본 업(Up)' / 100만 자족도시 / 메디컬클러스터 / 예산 2.36조 편성</p>
+      </div>
+      <div class="candidate-card">
+        <h4>조성환 <span style="font-size:0.8rem;color:var(--text-light);">(경기도의원)</span> <span class="badge badge-urgent">출마 대열 합류</span></h4>
+        <div class="role">기획재정위원장 | 매니페스토 13대 정책 | '실무현장형 정치'</div>
+        <p style="font-size:0.83rem;margin-top:6px;">비전: '내 삶에 도움이 되는 정치' / AI·블록체인 디지털 전환 + 평화·문화·생활 혁신 / 핀테크 실증 인프라 논의</p>
+      </div>
+      <div class="candidate-card">
+        <h4>손배찬 <span style="font-size:0.8rem;color:var(--text-light);">(전 파주시의장)</span> <span class="badge badge-urgent">2.24 출마선언</span></h4>
+        <div class="role">적합도 7.2% | '준비된 해결사' | 경제·행복·성장 3대 전환</div>
+        <p style="font-size:0.83rem;margin-top:6px;">이재명 정부 성공과 54만 파주 현안 해결을 위한 해결사 자처 / 최종환 전 시장 지지</p>
+      </div>
+      <div class="candidate-card">
+        <h4>이용욱 <span style="font-size:0.8rem;color:var(--text-light);">(경기도의원)</span> <span class="badge badge-urgent">2.20 출마선언·사직</span></h4>
+        <div class="role">적합도 6.7% | 세무사 21년 | 경제전문가 | 경제·공간·평화경제 3대 전략</div>
+        <p style="font-size:0.83rem;margin-top:6px;">양자대결 12.4% / 사무소 개소·공식 출마선언 / '이재명 정부 속도전 맞출 적임자' / 2.19 사직서 제출</p>
+      </div>
+      <div class="candidate-card">
+        <h4>조일출 <span style="font-size:0.8rem;color:var(--text-light);">(국정자문위원)</span></h4>
+        <div class="role">적합도 7%</div>
+      </div>
+      <div class="candidate-card">
+        <h4>최유각 <span style="font-size:0.8rem;color:var(--text-light);">(파주시의원)</span></h4>
+        <div class="role">적합도 1.8%</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <h3><span class="badge badge-ppp">국민의힘</span> 후보군</h3>
+        <div class="candidate-card ppp">
+          <h4>고준호 <span style="font-size:0.8rem;color:var(--text-light);">(경기도의원)</span> <span class="badge badge-urgent">1.7 공식 출마선언</span></h4>
+          <div class="role">1983년생 (40대) | 현장형 행정 | 세대교체 | 도시전환 정책</div>
+          <p style="font-size:0.83rem;margin-top:6px;">1.7 파주시청 기자회견 출마 공식화 / 문산전통시장 등 민생현장 행보 / PMC 종합병원 유치 지연 비판 / 세대교체론 부각</p>
+        </div>
+        <div class="candidate-card ppp">
+          <h4>안명규 <span style="font-size:0.8rem;color:var(--text-light);">(경기도의원)</span> <span class="badge badge-new">출판기념회 출마 의지</span></h4>
+          <div class="role">60년 파주 토박이 | 도당 부위원장 | 건설교통위원</div>
+          <p style="font-size:0.83rem;margin-top:6px;">자서전 '60년 파주 토박이의 삶과 꿈' 출판기념회로 출마 의지 / 도로·교통문제 해결사 / 안정 실무형 이미지</p>
+        </div>
+        <div class="candidate-card ppp">
+          <h4>김동규 <span style="font-size:0.8rem;color:var(--text-light);">(전 경기도의원)</span></h4>
+          <div class="role">2022 파주시장 경선 출마 경험</div>
+          <p style="font-size:0.83rem;margin-top:6px;">민선 8기 시장 경선 고배 후 재도전 준비</p>
+        </div>
+        <div class="candidate-card ppp">
+          <h4>이재홍 <span style="font-size:0.8rem;color:var(--text-light);">(전 파주시장)</span></h4>
+          <div class="role">민선 6기 새누리당 당선 | 중도 하차</div>
+          <p style="font-size:0.83rem;margin-top:6px;">출마 확정, 얼굴알리기 본격화 / 행정 경력 보유</p>
+        </div>
+        <div class="candidate-card ppp">
+          <h4>박용호 <span style="font-size:0.8rem;color:var(--text-light);">(파주갑 당협위원장)</span></h4>
+          <div class="role">세 번째 도전 | 조직 기반</div>
+        </div>
+        <div class="candidate-card ppp">
+          <h4>한길룡 <span style="font-size:0.8rem;color:var(--text-light);">(파주을 당협위원장)</span></h4>
+          <div class="role">전 경기도의원 | 지방자치아카데미 전국 최초 개최</div>
+          <p style="font-size:0.83rem;margin-top:6px;">당 후보 결정 시 지원 역할 표명 / 유보적 입장</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="badge badge-prog">진보당</span></h3>
+        <div class="candidate-card prog">
+          <h4>이재희 <span style="font-size:0.8rem;color:var(--text-light);">(파주을 지역위원장)</span></h4>
+          <div class="role">5대 무상복지</div>
+          <p style="font-size:0.83rem;margin-top:6px;">무상돌봄 / 무상의료 / 무상교육 / 무상급식 / 무상교통</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>📋 핵심 쟁점별 후보 정책 비교</h3>
+    <div style="overflow-x:auto;">
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th style="width:100px;">쟁점</th>
+            <th>김경일 (현 시장)</th>
+            <th style="background:var(--accent);">조성환</th>
+            <th>고준호 (국힘)</th>
+            <th>이재희 (진보)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>교통</strong></td>
+            <td>PBRT 12노선, GTX 연계</td>
+            <td style="background:#e8f5e9;"><strong>AI 교통관제 50개소</strong>, DRT+PBRT, C-ITS 구축, 3호선·GTX-H 연장</td>
+            <td>구체적 공약 미발표</td>
+            <td>무상교통</td>
+          </tr>
+          <tr>
+            <td><strong>의료</strong></td>
+            <td>PMC 착공, 종합병원 공모</td>
+            <td style="background:#e8f5e9;"><strong>달빛어린이병원 3개소</strong>, 24시간 응급의료, 공공의과대학, 중입자치료기</td>
+            <td>PMC 지연 비판</td>
+            <td>무상의료</td>
+          </tr>
+          <tr>
+            <td><strong>경제</strong></td>
+            <td>경제자유구역, 기업박람회</td>
+            <td style="background:#e8f5e9;"><strong>블록체인 특구</strong>, 스테이블코인, 핀테크 실증, 디지털노마드 특구</td>
+            <td>졸속 대형개발 비판</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><strong>교육</strong></td>
+            <td>파프리카 통학버스</td>
+            <td style="background:#e8f5e9;"><strong>AI 학습코치 전 학교</strong>, 학부모네트워크 조례, 통학 1.5km 원칙</td>
+            <td>구체적 공약 미발표</td>
+            <td>무상교육</td>
+          </tr>
+          <tr>
+            <td><strong>안전</strong></td>
+            <td>-</td>
+            <td style="background:#e8f5e9;"><strong>CPTED 미디어아트 5개소</strong>, AI CCTV 관제, 5대 범죄 30% 감소</td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><strong>문화</strong></td>
+            <td>문화·생태 휴양 중심도시</td>
+            <td style="background:#e8f5e9;"><strong>DMZ 평화 비엔날레</strong>, 미디어아트 콘텐츠, 블록체인 저작권</td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- =============== TAB 2: 여론조사 =============== -->
+<div class="tab-panel" id="tab2">
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>📊 민주당 적합도 조사 (2025.12 알앤써치)</h3>
+      <div class="chart-container"><canvas id="pollChart"></canvas></div>
+      <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;">파주시민 505명 ARS / 알앤써치 / 파주시대 의뢰 / 2025.12.27~29</p>
+    </div>
+    <div class="card">
+      <h3>📊 양자 가상대결</h3>
+      <div class="chart-container"><canvas id="vsChart"></canvas></div>
+      <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;">김경일 vs 손배찬: 29.9% vs 13.3% | 김경일 vs 이용욱: 32.3% vs 12.4%</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>🔍 조성환 여론조사 위치 분석</h3>
+    <div class="grid grid-3" style="margin-top:12px;">
+      <div style="text-align:center;padding:20px;background:#fff3e0;border-radius:10px;">
+        <div style="font-size:2.5rem;font-weight:800;color:var(--accent2);">출마 확정</div>
+        <div style="font-size:0.9rem;color:var(--text-light);">이투데이 2.19 보도</div>
+        <div style="font-size:0.8rem;color:var(--accent2);margin-top:4px;">도의원 4자 구도 중 1인 (사직 시한 3.5)</div>
+      </div>
+      <div style="padding:16px;">
+        <h4 style="margin-bottom:10px;">현재 위치 진단</h4>
+        <ul style="font-size:0.88rem;line-height:1.8;list-style:none;padding:0;">
+          <li>• <strong style="color:#1565c0;">도의원 4자 구도 합류 확정</strong></li>
+          <li>• 적합도 조사 미포함 → 인지도 열세</li>
+          <li>• 김경일 25%, 손배찬 7.2%, 조일출 7%</li>
+          <li>• 김경일 시정 긍정평가 <strong style="color:#c62828;">66.9%</strong></li>
+          <li>• 사직 시한 3.5 → 공식 출마 임박</li>
+        </ul>
+      </div>
+      <div style="padding:16px;">
+        <h4 style="margin-bottom:10px;">돌파 전략</h4>
+        <ul style="font-size:0.88rem;line-height:1.8;list-style:none;padding:0;">
+          <li>• 기획재정위원장 경력 홍보 강화</li>
+          <li>• 13대 정책 시민체감 콘텐츠 제작</li>
+          <li>• 운정신도시 젊은층 타겟 캠페인</li>
+          <li>• 소셜미디어 팔로워 급성장 필요</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>📈 2022 vs 2026 선거 지형 변화</h3>
+    <div class="grid grid-2" style="margin-top:12px;">
+      <div>
+        <h4 style="margin-bottom:10px;">2022년 제8회 지방선거 결과</h4>
+        <table class="policy-table">
+          <tr><td><strong>김경일 (민주)</strong></td><td style="color:var(--democrat);font-weight:700;">90,489표 (49.85%)</td></tr>
+          <tr><td>조병국 (국힘)</td><td>89,958표 (49.56%)</td></tr>
+          <tr><td colspan="2" style="color:var(--accent2);font-weight:600;">표차: 531표 (0.29%) — 역대급 초접전</td></tr>
+        </table>
+      </div>
+      <div>
+        <h4 style="margin-bottom:10px;">2026년 변화 요인</h4>
+        <ul style="font-size:0.88rem;line-height:1.9;list-style:none;padding:0;">
+          <li>📈 운정신도시 인구 급증 → 진보 성향 유입</li>
+          <li>🚄 GTX-A 개통 → 생활권 변화</li>
+          <li>🏥 종합병원 부재 → 시민 최대 불만</li>
+          <li>💧 2025.11 단수 사태 → 인프라 불만</li>
+          <li>⚖️ 민주당 다자 경선 → 분열 리스크</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== TAB 3: 소셜미디어 =============== -->
+<div class="tab-panel" id="tab3">
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+    <div class="sns-card">
+      <div class="platform">📺 유튜브</div>
+      <div class="handle">@pajusd</div>
+      <div class="status"><span class="badge badge-new">활성</span></div>
+    </div>
+    <div class="sns-card">
+      <div class="platform">📘 페이스북</div>
+      <div class="handle">pajusindong</div>
+      <div class="status"><span class="badge badge-new">활성</span></div>
+    </div>
+    <div class="sns-card">
+      <div class="platform">📷 인스타그램</div>
+      <div class="handle">pajusindong</div>
+      <div class="status"><span class="badge badge-new">활성</span></div>
+    </div>
+    <div class="sns-card">
+      <div class="platform">📝 네이버블로그</div>
+      <div class="handle">pajusindong/pjsindong</div>
+      <div class="status"><span class="badge badge-new">활성</span></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:20px;">
+    <div class="card">
+      <h3>📊 소셜미디어 경쟁력 레이더</h3>
+      <div class="chart-container"><canvas id="snsRadar"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>💡 디지털 소통 진단</h3>
+      <div style="margin-top:10px;">
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span>콘텐츠 다양성</span><span>40/100</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--accent2);"></div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span>플랫폼 활성도</span><span>50/100</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--primary);"></div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span>팔로워 규모</span><span>20/100</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:20%;background:#c62828;"></div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span>참여도(댓글/공유)</span><span>30/100</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--accent2);"></div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span>메시지 일관성</span><span>75/100</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--green);"></div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span>정책 전문성</span><span>85/100</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--green);"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:#fff3e0;border-radius:8px;font-size:0.85rem;">
+        <strong>최우선 과제:</strong> 팔로워 확보 + 숏폼 콘텐츠(릴스/숏츠) 활성화 + 운정 젊은층 타겟 콘텐츠
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>📋 플랫폼별 콘텐츠 전략 제안</h3>
+    <div style="overflow-x:auto;">
+      <table class="policy-table">
+        <thead>
+          <tr><th>플랫폼</th><th>현재 상태</th><th>타겟 콘텐츠</th><th>목표</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>유튜브</strong></td><td>활성</td><td>13대 정책 해설 시리즈, 의정활동 브이로그, 시민 인터뷰</td><td>구독자 5,000+</td></tr>
+          <tr><td><strong>인스타그램</strong></td><td>활성</td><td>정책 카드뉴스, 릴스(현장 모습), 스토리 Q&A</td><td>팔로워 10,000+</td></tr>
+          <tr><td><strong>페이스북</strong></td><td>활성</td><td>정책 심층 포스트, 라이브 방송, 지역이슈 공유</td><td>팔로워 5,000+</td></tr>
+          <tr><td><strong>블로그</strong></td><td>활성</td><td>정책 상세 해설, 의정보고, 시민제안 응답</td><td>일방문 1,000+</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- =============== TAB 4: 뉴스/여론 =============== -->
+<div class="tab-panel" id="tab4">
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>📊 파주시 시민 관심 이슈</h3>
+      <div class="chart-container"><canvas id="issueChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>📰 뉴스 감성 분석 (조성환 관련)</h3>
+      <div class="chart-container"><canvas id="sentimentChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:20px;">
+    <div class="card">
+      <h3>🔥 최근 주요 뉴스 이슈 <span style="font-size:0.75rem;color:var(--text-light);">(2026.03.01 업데이트)</span></h3>
+      <ul class="issue-list">
+        <li>
+          <span class="issue-num">1</span>
+          <div><strong>경기도의원 23명 배지 반납 — 파주시장 4자 구도 형성</strong><br><span style="font-size:0.82rem;color:var(--text-light);">2026.02.19 이투데이 / 민주 이용욱·조성환 vs 국힘 고준호·안명규 / 경기도의회 사상 초유</span></div>
+        </li>
+        <li>
+          <span class="issue-num">2</span>
+          <div><strong>이용욱 도의원 공식 출마선언·사직서 제출</strong><br><span style="font-size:0.82rem;color:var(--text-light);">2026.02.20 선거사무소 개소 / '이재명 정부 속도전 맞출 적임자' / 경제·공간·평화경제 3대 전략</span></div>
+        </li>
+        <li>
+          <span class="issue-num">3</span>
+          <div><strong>손배찬 전 시의장 공식 출마 선언 — 조성환 동석</strong><br><span style="font-size:0.82rem;color:var(--text-light);">2026.02.24 '준비된 해결사' / 경제·행복·성장 3대 전환 / 최종환 전 시장 지지</span></div>
+        </li>
+        <li>
+          <span class="issue-num">4</span>
+          <div><strong>김경일 시정 긍정평가 66.9% — 재선 프리미엄 강화</strong><br><span style="font-size:0.82rem;color:var(--text-light);">글로벌리서치 / 적합도 25% 선두 / 경선이 본선보다 어려운 구도 전망</span></div>
+        </li>
+        <li>
+          <span class="issue-num">5</span>
+          <div><strong>공무원·공공기관 사직 마감 3월 5일</strong><br><span style="font-size:0.82rem;color:var(--text-light);">선거일 90일전 / 도의원→기초단체장 출마 시 사직 필수 / 조성환·고준호·안명규 사직 시한</span></div>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>📈 이슈별 조성환 정책 연결</h3>
+      <ul class="issue-list">
+        <li>
+          <span class="issue-num" style="background:var(--green);">✓</span>
+          <div><strong>종합병원 부재</strong> → 달빛어린이병원 3개소 + 공공의과대학<br><span class="tag" style="background:#e8f5e9;color:var(--green);">제4정책 의료</span></div>
+        </li>
+        <li>
+          <span class="issue-num" style="background:var(--green);">✓</span>
+          <div><strong>GTX 연계교통 부족</strong> → AI 교통관제 + DRT 배차 15분<br><span class="tag" style="background:#e8f5e9;color:var(--green);">제1정책 교통</span></div>
+        </li>
+        <li>
+          <span class="issue-num" style="background:var(--green);">✓</span>
+          <div><strong>신구도심 양극화</strong> → 과밀-과소 균형 + 농촌 특성화<br><span class="tag" style="background:#e8f5e9;color:var(--green);">제2정책 교육</span></div>
+        </li>
+        <li>
+          <span class="issue-num" style="background:var(--green);">✓</span>
+          <div><strong>파주페이 확대</strong> → 스테이블코인 전환 실증<br><span class="tag" style="background:#e8f5e9;color:var(--green);">제7정책 지역화폐</span></div>
+        </li>
+        <li>
+          <span class="issue-num" style="background:var(--green);">✓</span>
+          <div><strong>안전 인프라</strong> → CPTED 미디어아트 + AI CCTV<br><span class="tag" style="background:#e8f5e9;color:var(--green);">제11정책 안전도시</span></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- =============== TAB 5: 조성환 분석 =============== -->
+<div class="tab-panel" id="tab5">
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>👤 조성환 프로필</h3>
+      <table class="policy-table">
+        <tr><td style="width:120px;font-weight:600;">출마 상태</td><td><span class="badge badge-urgent" style="font-size:0.85rem;">파주시장 출마 대열 합류 (2026.02.19 보도)</span></td></tr>
+        <tr><td style="font-weight:600;">소속</td><td>더불어민주당</td></tr>
+        <tr><td style="font-weight:600;">현직</td><td>경기도의원 (파주시 제2선거구) — 사직 시한 3월 5일</td></tr>
+        <tr><td style="font-weight:600;">전반기</td><td>교육기획위원회 부위원장</td></tr>
+        <tr><td style="font-weight:600;">후반기</td><td>기획재정위원회 위원장 (도 예산 40조 총괄)</td></tr>
+        <tr><td style="font-weight:600;">핵심 비전</td><td>"내 삶에 도움이 되는 정치"</td></tr>
+        <tr><td style="font-weight:600;">정책 기조</td><td>AI·블록체인·디지털 전환 + 평화·문화·생활 혁신</td></tr>
+        <tr><td style="font-weight:600;">주요 성과</td><td>난독증 바우처, 교하 족구장, 소방 803명 확충, 119특수대응단 407억</td></tr>
+        <tr><td style="font-weight:600;">국정 연동</td><td>이재명 정부 AX, C-ITS, 블록체인, CBDC '한강', AI 교과서</td></tr>
+        <tr><td style="font-weight:600;">학력</td><td>가톨릭대 의료경영대학원 (경영학 석사)</td></tr>
+        <tr><td style="font-weight:600;">최근 활동</td><td>핀테크산업협회 간담회(2026.02), 파주 특수교육 개선 정담회, 운광초 청소년의회교실, 병역명문가 조례 개정</td></tr>
+        <tr><td style="font-weight:600;">선거 구도</td><td>민주당 이용욱·조성환 vs 국힘 고준호·안명규 (도의원 4자 구도)</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>📊 8축 경쟁력 레이더</h3>
+      <div class="chart-container"><canvas id="competencyRadar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>📋 SWOT 분석</h3>
+    <div class="swot-grid">
+      <div class="swot-box swot-s">
+        <h4>💪 강점 (Strengths)</h4>
+        <ul>
+          <li>기획재정위원장 — 경기도 예산 40조 총괄 경험</li>
+          <li>매니페스토 13대 정책 체계 완성 (SMART 기준)</li>
+          <li>AI·블록체인 등 미래 기술 비전 선점</li>
+          <li>교육기획위 부위원장 — 교육 현장 전문성</li>
+          <li>난독증 바우처, 소방 인력 확충 등 검증된 실행력</li>
+          <li>이재명 정부 국정과제와 유기적 연동</li>
+        </ul>
+      </div>
+      <div class="swot-box swot-w">
+        <h4>⚠️ 약점 (Weaknesses)</h4>
+        <ul>
+          <li>여론조사 상위권 미진입 — 인지도 열세</li>
+          <li>현 시장(25%) 대비 큰 격차</li>
+          <li>소셜미디어 팔로워 규모 부족</li>
+          <li>정책이 기술 중심 → 시민 체감도 부족 우려</li>
+          <li>블록체인·스테이블코인 등 일반 시민 이해도 낮음</li>
+        </ul>
+      </div>
+      <div class="swot-box swot-o">
+        <h4>🌟 기회 (Opportunities)</h4>
+        <ul>
+          <li><strong>출마 대열 합류 확정 → 본격 캠페인 돌입 가능</strong></li>
+          <li>도의원 4자 구도 → '실무현장형 정치' 차별화</li>
+          <li>운정신도시 젊은 유권자 급증 (인구 57.5%)</li>
+          <li>종합병원 부재 → 의료 공약 체감도 높음</li>
+          <li>이재명 정부 출범 → 국정과제 시너지</li>
+          <li>현 시장 성과 불만 (단수사태, PMC 지연 등)</li>
+        </ul>
+      </div>
+      <div class="swot-box swot-t">
+        <h4>🔴 위협 (Threats)</h4>
+        <ul>
+          <li>현 시장 재선 프리미엄 (적합도 25% 선두)</li>
+          <li>민주당 경선 다자 구도 → 표 분산</li>
+          <li>손배찬, 이용욱, 조일출 등 경쟁 후보 다수</li>
+          <li>국힘 고준호 세대교체론 → 젊은층 경합</li>
+          <li>경선 후유증 → 본선 영향 우려</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>📊 매니페스토 13대 정책 한눈에 보기</h3>
+    <div class="grid grid-3">
+      <div class="manifesto-card"><h4>제1정책: 교통</h4><p>AI 교통관제센터, DRT+PBRT, C-ITS 인프라, 3호선·GTX-H 연장</p><div class="kpi-line">KPI: 이동시간 10%↓ / AI신호 50개소 / DRT 15분</div></div>
+      <div class="manifesto-card"><h4>제2정책: 교육</h4><p>AI 학습코치, 학부모 네트워크 조례, 통학 1.5km 원칙, AI 대학원</p><div class="kpi-line">KPI: AI코치 전교 / 조례제정 / 1.5km원칙</div></div>
+      <div class="manifesto-card"><h4>제3정책: 복지</h4><p>AI 위기가구 선제 발굴, 고독사 '0' 도전, 파주형 AI 복지</p><div class="kpi-line">KPI: AI발굴 시스템 / 고독사0 / 민원50%↓</div></div>
+      <div class="manifesto-card"><h4>제4정책: 의료</h4><p>달빛어린이병원, 24시간 응급의료, 공공의과대학, 중입자치료기</p><div class="kpi-line">KPI: 달빛3개소 / 24시간응급 / PMC가속</div></div>
+      <div class="manifesto-card"><h4>제5정책: 행정</h4><p>디지털 지방정부, AI 자동회의록, 예산신문고, 블록체인 의정</p><div class="kpi-line">KPI: 민원50%↓ / 플랫폼단일화 / AI회의록</div></div>
+      <div class="manifesto-card"><h4>제6정책: 금융</h4><p>운정테크노밸리 블록체인 특구, 규제샌드박스, 이중 인센티브</p><div class="kpi-line">KPI: 기업50사 / 규제샌드박스10건</div></div>
+      <div class="manifesto-card"><h4>제7정책: 지역화폐</h4><p>파주페이 4,000억, 스테이블코인 전환, 외국인 디지털결제</p><div class="kpi-line">KPI: 4000억 / 스테이블코인 / 외국인5만건</div></div>
+      <div class="manifesto-card"><h4>제8정책: 문화·예술</h4><p>DMZ 평화 비엔날레, 미디어아트 콘텐츠, 블록체인 저작권</p><div class="kpi-line">KPI: 비엔날레 추진위 / 상설전시 / 저작권실증</div></div>
+      <div class="manifesto-card"><h4>제9정책: 관광</h4><p>DMZ 체류형 관광, AR·AI 관광안내, 영어마을 숙소 2,000실</p><div class="kpi-line">KPI: 체류30%↑ / AR구축 / 숙소2000실</div></div>
+      <div class="manifesto-card"><h4>제10정책: 글로벌 전략</h4><p>디지털노마드 비자 특구, K-컬처 평화 브랜드, 국제페스티벌</p><div class="kpi-line">KPI: 페스티벌 연2회 / 노마드1000명</div></div>
+      <div class="manifesto-card" style="border-top-color:var(--green);"><h4>제11정책: 안전도시 <span class="badge badge-new">신규</span></h4><p>CPTED 미디어아트 안전거리, AI CCTV 관제, 종합안전계획</p><div class="kpi-line">KPI: 안전거리5개소 / 5대범죄30%↓</div></div>
+      <div class="manifesto-card" style="border-top-color:var(--green);"><h4>제12정책: 통합생활 <span class="badge badge-new">신규</span></h4><p>통학형 대중교통, 돌봄 연계, 교육복지 통합 플랫폼</p><div class="kpi-line">KPI: 통학노선10개 / 돌봄연계 / 통합플랫폼</div></div>
+      <div class="manifesto-card" style="border-top-color:var(--green);"><h4>제13정책: 체육·건강 <span class="badge badge-new">신규</span></h4><p>청소년 체육시설, 예방 건강정책, AI 건강관리, 국제대회 유치</p><div class="kpi-line">KPI: 체육시설↑ / 건강플랫폼 / 국제대회</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== TAB 6: 전략 제안 =============== -->
+<div class="tab-panel" id="tab6">
+  <div class="card" style="margin-bottom:20px;">
+    <h3>🎯 8대 보완 전략</h3>
+    <div class="grid grid-2" style="margin-top:12px;">
+      <div>
+        <div class="strategy-card strategy-urgent">
+          <span class="badge badge-urgent">긴급</span>
+          <h4 style="margin-top:8px;">1. 인지도 급상승 캠페인</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">여론조사 미진입 상태 → 3개월 내 인지도 30% 이상 도달 / 운정신도시 젊은층 중심 오프라인+온라인 동시 캠페인 / '기획재정위원장이 만드는 파주' 브랜딩</p>
+        </div>
+        <div class="strategy-card strategy-urgent">
+          <span class="badge badge-urgent">긴급</span>
+          <h4 style="margin-top:8px;">2. 소셜미디어 팔로워 급성장</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">4개 채널 팔로워 동시 확보 / 유튜브 숏츠·인스타 릴스 주 5회+ / 13대 정책 카드뉴스 시리즈 / 시민 참여형 콘텐츠(챌린지, Q&A)</p>
+        </div>
+        <div class="strategy-card strategy-important">
+          <span class="badge badge-strategic">중요</span>
+          <h4 style="margin-top:8px;">3. 13대 정책 시민체감 번역</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">AI·블록체인 등 전문용어 → 시민 언어로 번역 / '내 아이 학교가 달라진다' '밤에도 안심 병원' 등 스토리텔링 / 정책별 30초 영상 제작</p>
+        </div>
+        <div class="strategy-card strategy-important">
+          <span class="badge badge-strategic">중요</span>
+          <h4 style="margin-top:8px;">4. 현 시장과의 차별화 포인트</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">'관리의 4년' vs '혁신의 4년' 프레임 / PMC 지연·단수사태 등 성과 부진 부각 / 기획재정위원장의 예산 전문성 = 실행력 차이</p>
+        </div>
+      </div>
+      <div>
+        <div class="strategy-card strategy-important">
+          <span class="badge badge-strategic">중요</span>
+          <h4 style="margin-top:8px;">5. 운정신도시 타겟 공략</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">인구 57.5% 집중 → 선거 승패 좌우 지역 / 30~40대 맞벌이 가정 '교통·육아·교육 통합' 정책 어필 / GTX 통근족 대상 AI 교통관제 체감 콘텐츠</p>
+        </div>
+        <div class="strategy-card strategy-strategic">
+          <span class="badge badge-dem">전략적</span>
+          <h4 style="margin-top:8px;">6. 이재명 정부 국정과제 연동 홍보</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">AX, C-ITS, CBDC '한강', AI 교과서 등과 13대 정책 1:1 매칭 / '국정과제를 파주에서 가장 먼저 실현하는 시장' 포지셔닝</p>
+        </div>
+        <div class="strategy-card strategy-strategic">
+          <span class="badge badge-dem">전략적</span>
+          <h4 style="margin-top:8px;">7. 기획재정위원장 경력 극대화</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">40조 예산 총괄 = 2.36조 파주 예산의 17배 경험 / '예산을 아는 시장이 돈을 아끼는 시장' / 구체적 예산 확보 성과 사례 홍보</p>
+        </div>
+        <div class="strategy-card strategy-strategic">
+          <span class="badge badge-dem">전략적</span>
+          <h4 style="margin-top:8px;">8. 의료 공약 선점 강화</h4>
+          <p style="font-size:0.85rem;margin-top:6px;">종합병원 전무 = 시민 최대 불만 → 가장 구체적 해법 제시 / 달빛어린이병원·공공의과대학·중입자치료기 3단계 로드맵 / '밤에도 아이 걱정 없는 파주'</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📅 실행 타임라인</h3>
+    <div class="chart-container" style="height:300px;"><canvas id="timelineChart"></canvas></div>
+    <div style="margin-top:16px;">
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:var(--accent2);"></div>
+        <div class="timeline-content">
+          <strong>2026년 3월 (D-94~64) ⚡ 사직 시한 3.5</strong>
+          <div class="timeline-date">사직→공식 출마 + 인지도 급상승 + 소셜미디어 기반 구축</div>
+          <p style="font-size:0.85rem;">3.5 사직 완료, 출마 공식선언, SNS 팔로워 확보 집중, 13대 정책 카드뉴스/숏폼 제작</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:var(--primary);"></div>
+        <div class="timeline-content">
+          <strong>2026년 4월 (D-65~35)</strong>
+          <div class="timeline-date">정책 차별화 + 민주당 경선 준비</div>
+          <p style="font-size:0.85rem;">기획재정위원장 경력 홍보, 국정과제 연동 어필, 경선 토론 준비</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:var(--green);"></div>
+        <div class="timeline-content">
+          <strong>2026년 5월 (D-35~3)</strong>
+          <div class="timeline-date">경선 + 본선 전환 / 후보 등록 (5.14~15)</div>
+          <p style="font-size:0.85rem;">당내 단합, 13대 정책 종합 발표, 시민토론회, 유권자 접점 극대화</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:#c62828;"></div>
+        <div class="timeline-content">
+          <strong>2026년 6월 3일</strong>
+          <div class="timeline-date">제9회 전국동시지방선거 투표일</div>
+          <p style="font-size:0.85rem;">투표 독려, 최종 결전</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<script>
+// Tab navigation
+function showTab(idx) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+// Chart defaults
+Chart.defaults.font.family = "'Segoe UI','Malgun Gothic',sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+const chartInstances = {};
+
+// === 대시보드 데이터 자동 로딩 ===
+async function loadDashboardData() {
+  try {
+    const resp = await fetch('data/dashboard-data.json?t=' + Date.now());
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    applyDashboardData(data);
+    return data;
+  } catch (e) {
+    console.log('dashboard-data.json 로드 실패, 기본값 사용');
+    return null;
+  }
+}
+
+function applyDashboardData(d) {
+  // 헤더 업데이트
+  if (d.header) {
+    const metaEl = document.querySelector('.header-info');
+    if (metaEl) {
+      metaEl.innerHTML =
+        '<span>업데이트: ' + d.header.update_date + '</span>' +
+        '<span>선거일: 2026.06.03 (D-' + d.header.d_day + ')</span>' +
+        '<span>유권자 수: ' + d.header.voters + '</span>';
+    }
+  }
+  // 감성분석 차트 업데이트
+  if (d.sentiment && d.sentiment['조성환']) {
+    const s = d.sentiment['조성환'];
+    const c = chartInstances['sentimentChart'];
+    if (c) {
+      c.data.labels = ['긍정 ' + s.positive + '%', '중립 ' + s.neutral + '%', '부정 ' + s.negative + '%'];
+      c.data.datasets[0].data = [s.positive, s.neutral, s.negative];
+      c.update();
+    }
+  }
+  // 이슈 관심도 차트 업데이트
+  if (d.issue_interest && d.issue_interest.data && d.issue_interest.data.some(v => v > 0)) {
+    const c = chartInstances['issueChart'];
+    if (c) {
+      c.data.labels = d.issue_interest.labels;
+      c.data.datasets[0].data = d.issue_interest.data;
+      c.update();
+    }
+  }
+  // 소셜미디어 레이더 업데이트
+  if (d.social_radar) {
+    const c = chartInstances['snsRadar'];
+    if (c) {
+      c.data.datasets[0].data = d.social_radar['조성환'] || [40,45,40,55,40,30,85];
+      c.data.datasets[1].data = d.social_radar['김경일_추정'] || [65,60,55,60,60,50,55];
+      c.update();
+    }
+  }
+  // 경쟁력 레이더 업데이트
+  if (d.competitiveness_radar && d.competitiveness_radar['조성환']) {
+    const c = chartInstances['competencyRadar'];
+    if (c) {
+      c.data.datasets[0].data = d.competitiveness_radar['조성환'];
+      c.update();
+    }
+  }
+  // 소셜미디어 플랫폼 데이터 업데이트
+  if (d.social_media && d.social_media.platforms) {
+    const platforms = d.social_media.platforms;
+    const cards = document.querySelectorAll('.sns-card');
+    const platformKeys = ['youtube', 'facebook', 'instagram', 'blog'];
+    platformKeys.forEach((key, i) => {
+      if (platforms[key] && cards[i]) {
+        const statusEl = cards[i].querySelector('.status .badge');
+        if (statusEl) {
+          statusEl.textContent = platforms[key].status;
+          statusEl.className = platforms[key].status === '활성' ? 'badge badge-new' : 'badge badge-urgent';
+        }
+      }
+    });
+    // 수집 시간 표시
+    if (d.social_media.collected_at) {
+      const timeStr = d.social_media.collected_at.substring(0, 16).replace('T', ' ');
+      console.log('소셜미디어 수집 시간: ' + timeStr);
+    }
+  }
+  // 데이터 신선도 인디케이터
+  if (d.collection_status) {
+    const metaEl = document.querySelector('.header-info');
+    if (metaEl && d.collection_status.news_last_success) {
+      const lastUpdate = new Date(d.collection_status.news_last_success);
+      const hoursAgo = Math.floor((Date.now() - lastUpdate) / 3600000);
+      const indicator = hoursAgo <= 2 ? '🟢' : hoursAgo <= 6 ? '🟡' : '🔴';
+      const existing = metaEl.querySelectorAll('span');
+      let hasIndicator = false;
+      existing.forEach(s => { if (s.textContent.includes('데이터')) hasIndicator = true; });
+      if (!hasIndicator) {
+        const span = document.createElement('span');
+        span.textContent = indicator + ' 데이터 ' + hoursAgo + '시간 전';
+        metaEl.appendChild(span);
+      }
+    }
+  }
+}
+
+// 정당 지지율
+chartInstances['partyChart'] = new Chart(document.getElementById('partyChart'), {
+  type:'doughnut',
+  data:{
+    labels:['더불어민주당','국민의힘','조국혁신당','진보당','기타/무응답'],
+    datasets:[{data:[51.2,23.0,8.5,3.2,14.1],backgroundColor:['#004ea2','#e61e2b','#f5a623','#d32f2f','#bdbdbd'],borderWidth:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+});
+
+// 민주당 적합도
+chartInstances['pollChart'] = new Chart(document.getElementById('pollChart'), {
+  type:'bar',
+  data:{
+    labels:['김경일\n(현 시장)','손배찬\n(전 시의장)','조일출\n(국정자문)','이용욱\n(도의원)','최유각\n(시의원)','기타/미정'],
+    datasets:[{label:'적합도(%)',data:[25,7.2,7,6.7,1.8,52.3],backgroundColor:['#1565c0','#42a5f5','#64b5f6','#90caf9','#bbdefb','#e0e0e0'],borderWidth:0,borderRadius:6}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:55,ticks:{callback:v=>v+'%'}}}}
+});
+
+// 양자 가상대결 (2개 세트)
+chartInstances['vsChart'] = new Chart(document.getElementById('vsChart'), {
+  type:'bar',
+  data:{
+    labels:['김경일\nvs손배찬','손배찬','김경일\nvs이용욱','이용욱','기타/미정'],
+    datasets:[{label:'지지율(%)',data:[29.9,13.3,32.3,12.4,55.3],backgroundColor:['#1565c0','#42a5f5','#1565c0','#90caf9','#e0e0e0'],borderRadius:6}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:60,ticks:{callback:v=>v+'%'}}}}
+});
+
+// 소셜미디어 레이더
+chartInstances['snsRadar'] = new Chart(document.getElementById('snsRadar'), {
+  type:'radar',
+  data:{
+    labels:['유튜브','페이스북','인스타그램','블로그','콘텐츠 다양성','참여도','정책전문성'],
+    datasets:[
+      {label:'조성환',data:[40,45,40,55,40,30,85],borderColor:'#004ea2',backgroundColor:'rgba(0,78,162,0.15)',pointBackgroundColor:'#004ea2',borderWidth:2},
+      {label:'김경일(추정)',data:[65,60,55,60,60,50,55],borderColor:'#e61e2b',backgroundColor:'rgba(230,30,43,0.1)',pointBackgroundColor:'#e61e2b',borderWidth:2,borderDash:[5,5]}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:20}}},plugins:{legend:{position:'bottom'}}}
+});
+
+// 시민 관심 이슈
+chartInstances['issueChart'] = new Chart(document.getElementById('issueChart'), {
+  type:'bar',
+  data:{
+    labels:['교통·GTX 연계','종합병원 유치','교육 인프라','경제·일자리','주거·재개발','안전·치안','상수도 인프라'],
+    datasets:[{label:'관심도',data:[92,88,75,70,65,58,55],backgroundColor:['#1565c0','#c62828','#f57c00','#2e7d32','#7b1fa2','#00838f','#4e342e'],borderRadius:6}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100}}}
+});
+
+// 감성 분석
+chartInstances['sentimentChart'] = new Chart(document.getElementById('sentimentChart'), {
+  type:'doughnut',
+  data:{
+    labels:['긍정','중립','부정'],
+    datasets:[{data:[45,40,15],backgroundColor:['#2e7d32','#757575','#c62828'],borderWidth:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+});
+
+// 경쟁력 레이더
+chartInstances['competencyRadar'] = new Chart(document.getElementById('competencyRadar'), {
+  type:'radar',
+  data:{
+    labels:['정책전문성','예산역량','의정경험','인지도','소셜미디어','시민소통','미래비전','실행력'],
+    datasets:[{
+      label:'조성환',
+      data:[90,95,80,25,35,50,92,78],
+      borderColor:'#004ea2',backgroundColor:'rgba(0,78,162,0.2)',pointBackgroundColor:'#004ea2',borderWidth:2
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:20}}},plugins:{legend:{position:'bottom'}}}
+});
+
+// 타임라인 차트
+chartInstances['timelineChart'] = new Chart(document.getElementById('timelineChart'), {
+  type:'bar',
+  data:{
+    labels:['3월\n인지도 구축','4월\n정책 차별화','5월\n경선·본선','6월\n선거일'],
+    datasets:[
+      {label:'인지도 캠페인',data:[90,70,50,30],backgroundColor:'rgba(255,111,0,0.7)',borderRadius:4},
+      {label:'정책 홍보',data:[40,90,80,50],backgroundColor:'rgba(21,101,192,0.7)',borderRadius:4},
+      {label:'현장 활동',data:[50,60,95,90],backgroundColor:'rgba(46,125,50,0.7)',borderRadius:4}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{max:100,ticks:{display:false}},x:{grid:{display:false}}}}
+});
+
+// 페이지 로드 시 대시보드 데이터 자동 적용
+loadDashboardData();
+
+// 5분마다 자동 갱신
+setInterval(loadDashboardData, 300000);
+</script>
+
+</body>
+</html>

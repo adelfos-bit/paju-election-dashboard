@@ -1,0 +1,119 @@
+{
+  "social_media": {
+    "platforms": {
+      "youtube": {
+        "status": "개설완료",
+        "subscribers": 0,
+        "videos": 0,
+        "last_upload": null,
+        "recent_videos": [],
+        "score": 5
+      },
+      "facebook": {
+        "status": "활성",
+        "followers": 500,
+        "recent_posts": [],
+        "score": 2
+      },
+      "instagram": {
+        "status": "활성",
+        "followers": 200,
+        "posts": 30,
+        "score": 11
+      },
+      "blog": {
+        "status": "활성",
+        "posts": 1,
+        "last_post": "2018-05-29",
+        "recent_posts": [
+          {
+            "title": "후보자 등록접수",
+            "date": "2018-05-29",
+            "url": "https://blog.naver.com/pajusindong/221286686885?fromRss=true&trackingCode=rss"
+          }
+        ],
+        "score": 2
+      }
+    },
+    "recent_posts": [
+      {
+        "platform": "blog",
+        "title": "후보자 등록접수",
+        "date": "2018-05-29",
+        "url": "https://blog.naver.com/pajusindong/221286686885?fromRss=true&trackingCode=rss"
+      }
+    ],
+    "sentiment": {
+      "positive": 45,
+      "neutral": 40,
+      "negative": 15
+    },
+    "collected_at": "2026-03-01T13:40:45.946753"
+  },
+  "social_radar": {
+    "조성환": [
+      5,
+      2,
+      11,
+      2,
+      40,
+      30
+    ],
+    "김경일_추정": [
+      65,
+      60,
+      55,
+      60,
+      60,
+      50
+    ]
+  },
+  "competitiveness_radar": {
+    "조성환": [
+      90,
+      95,
+      80,
+      5,
+      30,
+      50,
+      92,
+      78
+    ]
+  },
+  "collection_status": {
+    "social_last_success": "2026-03-01T13:40:45.956207",
+    "news_last_success": "2026-03-01T13:40:45.376520",
+    "news_articles_collected": 0
+  },
+  "last_updated": "2026-03-01",
+  "election_date": "2026-06-03",
+  "header": {
+    "update_date": "2026.03.01",
+    "d_day": 94,
+    "voters": "~45만 명"
+  },
+  "issue_interest": {
+    "labels": [
+      "교통/GTX",
+      "의료/병원",
+      "균형발전",
+      "군사규제",
+      "경제/일자리",
+      "교육 인프라",
+      "안전/인프라",
+      "문화/관광"
+    ],
+    "data": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "media_exposure": {},
+  "sentiment_details": {}
+}

@@ -96,6 +96,40 @@ body { font-family:'Segoe UI','Malgun Gothic',sans-serif; background:var(--bg); 
 .manifesto-card h4 { color:var(--primary); margin-bottom:8px; }
 .manifesto-card .kpi-line { font-size:0.78rem; color:var(--accent2); margin-top:6px; font-weight:600; }
 .manifesto-card p { font-size:0.88rem; line-height:1.5; }
+.edu-hero { background:linear-gradient(135deg,#1b5e20,#2e7d32,#43a047); color:#fff; border-radius:16px; padding:28px; text-align:center; margin-bottom:24px; }
+.edu-hero h2 { font-size:1.6rem; margin-bottom:8px; letter-spacing:2px; }
+.edu-hero .catchphrase { font-size:1.1rem; opacity:0.95; }
+.edu-hero .sub-msg { font-size:0.88rem; opacity:0.8; margin-top:8px; }
+.edu-section { margin-bottom:28px; }
+.edu-section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; padding:12px 18px; border-radius:10px; }
+.edu-section-header.safe { background:linear-gradient(90deg,#e8f5e9,#c8e6c9); border-left:5px solid #2e7d32; }
+.edu-section-header.fun { background:linear-gradient(90deg,#fff3e0,#ffe0b2); border-left:5px solid #ff6f00; }
+.edu-section-header.smart { background:linear-gradient(90deg,#e3f2fd,#bbdefb); border-left:5px solid #1565c0; }
+.edu-section-header h3 { font-size:1.15rem; margin:0; }
+.edu-section-header .desc { font-size:0.85rem; color:var(--text-light); }
+.edu-pledge { background:var(--card); border-radius:12px; padding:20px; box-shadow:var(--shadow); margin-bottom:16px; position:relative; overflow:hidden; }
+.edu-pledge::before { content:''; position:absolute; top:0; left:0; width:5px; height:100%; }
+.edu-pledge.safe::before { background:#2e7d32; }
+.edu-pledge.fun::before { background:#ff6f00; }
+.edu-pledge.smart::before { background:#1565c0; }
+.edu-pledge .pledge-num { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; color:#fff; font-weight:800; font-size:0.9rem; margin-right:10px; flex-shrink:0; }
+.edu-pledge.safe .pledge-num { background:#2e7d32; }
+.edu-pledge.fun .pledge-num { background:#ff6f00; }
+.edu-pledge.smart .pledge-num { background:#1565c0; }
+.edu-pledge h4 { display:flex; align-items:center; font-size:1rem; margin-bottom:10px; }
+.edu-pledge .pledge-desc { font-size:0.88rem; color:var(--text); line-height:1.6; margin-bottom:10px; padding-left:42px; }
+.edu-pledge .pledge-items { list-style:none; padding-left:42px; }
+.edu-pledge .pledge-items li { padding:5px 0; font-size:0.85rem; line-height:1.5; position:relative; padding-left:18px; }
+.edu-pledge .pledge-items li::before { content:'✓'; position:absolute; left:0; color:#2e7d32; font-weight:700; }
+.edu-pledge.fun .pledge-items li::before { color:#ff6f00; }
+.edu-pledge.smart .pledge-items li::before { color:#1565c0; }
+.edu-sub-section { margin-left:42px; margin-top:8px; padding:12px 16px; background:#f9fafb; border-radius:8px; margin-bottom:8px; }
+.edu-sub-section h5 { font-size:0.88rem; color:var(--primary); margin-bottom:6px; }
+.edu-timeline-row { display:flex; gap:10px; margin-top:8px; padding-left:42px; flex-wrap:wrap; }
+.edu-year { display:inline-block; padding:4px 12px; border-radius:16px; font-size:0.78rem; font-weight:600; }
+.edu-year.y1 { background:#e8f5e9; color:#2e7d32; }
+.edu-year.y2 { background:#fff3e0; color:#e65100; }
+.edu-year.y3 { background:#e3f2fd; color:#1565c0; }
 @media (max-width:768px) {
   .header { padding:14px; }
   .header h1 { font-size:1.1rem; }
@@ -124,7 +158,8 @@ body { font-family:'Segoe UI','Malgun Gothic',sans-serif; background:var(--bg); 
   <div class="tab" onclick="showTab(3)">소셜미디어</div>
   <div class="tab" onclick="showTab(4)">뉴스/여론</div>
   <div class="tab" onclick="showTab(5)">조성환 분석</div>
-  <div class="tab" onclick="showTab(6)">전략 제안</div>
+  <div class="tab" onclick="showTab(6)">교육공약</div>
+  <div class="tab" onclick="showTab(7)">전략 제안</div>
 </div>
 
 <div class="content">
@@ -667,8 +702,204 @@ body { font-family:'Segoe UI','Malgun Gothic',sans-serif; background:var(--bg); 
   </div>
 </div>
 
-<!-- =============== TAB 6: 전략 제안 =============== -->
+<!-- =============== TAB 6: 교육공약 매니페스토 =============== -->
 <div class="tab-panel" id="tab6">
+
+  <!-- 히어로 배너 -->
+  <div class="edu-hero">
+    <h2>안전한 학교 · 신나는 학교 · 똑똑한 학교</h2>
+    <div class="catchphrase">파주시장 교육공약 — 조성환 예비후보</div>
+    <div class="sub-msg">아이들의 오늘을 웃게 하고, 내일을 바꾸겠습니다.</div>
+  </div>
+
+  <!-- 교육공약 개요 카드 + 레이더 차트 -->
+  <div class="grid grid-2" style="margin-bottom:24px;">
+    <div class="card">
+      <h3>📋 교육공약 7대 핵심 과제</h3>
+      <table class="policy-table" style="margin-top:8px;">
+        <thead><tr><th style="width:80px;">분류</th><th>공약명</th><th style="width:100px;">유형</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-new">안전</span></td><td>① 통학 안전 강화 — 파프리카의 완성</td><td><span class="tag" style="background:#e8f5e9;color:#2e7d32;">실적 기반</span></td></tr>
+          <tr><td><span class="badge badge-new">안전</span></td><td>② 교실 공기질 실시간 안심 데이터 서비스</td><td><span class="tag" style="background:#e3f2fd;color:#1565c0;">전국 최초</span></td></tr>
+          <tr><td><span class="badge badge-new">안전</span></td><td>③ 로컬푸드 급식 연계 플랫폼</td><td><span class="tag" style="background:#fff3e0;color:#e65100;">농가 연계</span></td></tr>
+          <tr><td><span class="badge badge-urgent">신나는</span></td><td>④ 학생 동아리(정규·자율) 지원</td><td><span class="tag" style="background:#fff3e0;color:#e65100;">학생 직접</span></td></tr>
+          <tr><td><span class="badge badge-urgent">신나는</span></td><td>⑤ 학생자치 지원 — 학생이 주인인 학교</td><td><span class="tag" style="background:#fce4ec;color:#c62828;">핵심 전략</span></td></tr>
+          <tr><td><span class="badge badge-strategic">똑똑</span></td><td>⑥ 파주시장배 AI 활용 경진대회</td><td><span class="tag" style="background:#e3f2fd;color:#1565c0;">AI 시대</span></td></tr>
+          <tr><td><span class="badge badge-strategic">똑똑</span></td><td>⑦ 학생 정책 상시 공모 — 내 이름의 정책</td><td><span class="tag" style="background:#e8eaf6;color:#1a237e;">민주시민</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>📊 교육공약 3축 분석</h3>
+      <div class="chart-container"><canvas id="eduRadar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Ⅰ. 안전한 학교 -->
+  <div class="edu-section">
+    <div class="edu-section-header safe">
+      <h3>Ⅰ. 안전한 학교</h3>
+      <div class="desc">파프리카로 시작한 안전, 학교 안까지 완성하겠습니다. 통학버스부터 교실 공기질, 급식 먹거리까지 — 아이의 하루 전체를 감싸는 안전 체계</div>
+    </div>
+
+    <div class="edu-pledge safe">
+      <h4><span class="pledge-num">①</span>통학 안전 강화 — 파프리카의 완성</h4>
+      <div class="pledge-desc">파프리카(학생전용 통학순환버스)는 2024년 전국 최초로 도입되어 연간 25만 명이 이용하는 파주 대표 교통복지. 이제 버스 밖 통학로까지 완성합니다.</div>
+      <ul class="pledge-items">
+        <li>파프리카 노선 및 배차시간 지속 확대 (수요 기반 확장)</li>
+        <li>서비스 품질 상시 모니터링 및 개선</li>
+        <li>학교 주변 보행로 정비 및 불법 주정차 상시 단속</li>
+      </ul>
+      <div style="margin-top:10px;padding-left:42px;"><span class="tag" style="background:#e8f5e9;color:#2e7d32;font-size:0.8rem;">연간 25만 명 이용 실적</span> <span class="tag" style="background:#e3f2fd;color:#1565c0;font-size:0.8rem;">조성환 도의원 공약 정책</span> <span class="tag" style="background:#fff3e0;color:#e65100;font-size:0.8rem;">전국 최초 2024</span></div>
+    </div>
+
+    <div class="edu-pledge safe">
+      <h4><span class="pledge-num">②</span>교실 실내 공기질 실시간 안심 데이터 서비스</h4>
+      <div class="pledge-desc">학교보건법상 교실 공기청정기 설치는 의무화되어 있지만, 실제 공기질이 좋은지 학부모는 알 수 없습니다. 실태를 알아야 안심하거나, 개선할 수 있습니다.</div>
+      <ul class="pledge-items">
+        <li>환경부 성능인증 IoT 센서 (미세먼지·CO₂·온습도·VOC) 학교 자율 설치 지원</li>
+        <li>파주시 데이터망 구축 → 학부모 앱으로 외부·실내 공기질 실시간 비교 확인</li>
+        <li>실내 공기질 하락 경보 발생 시 사용자에게 즉시 알림</li>
+        <li>센서 설치 참여 학교에 공기청정기 필터 교체 비용 무료 지원 (인센티브)</li>
+      </ul>
+      <div style="margin-top:10px;padding-left:42px;">
+        <span class="tag" style="background:#fce4ec;color:#c62828;font-size:0.8rem;">전국 최초·유일</span>
+        <span class="tag" style="background:#e3f2fd;color:#1565c0;font-size:0.8rem;">교실당 ~100만 원</span>
+        <span class="tag" style="background:#e8eaf6;color:#1a237e;font-size:0.8rem;">총 ~20억 원 규모</span>
+        <span class="tag" style="background:#e8f5e9;color:#2e7d32;font-size:0.8rem;">IoT 네트워크</span>
+      </div>
+    </div>
+
+    <div class="edu-pledge safe">
+      <h4><span class="pledge-num">③</span>파주 먹거리로 파주 아이들 밥상 채우기 — 로컬푸드 급식 연계 플랫폼</h4>
+      <div class="pledge-desc">파주 쌀은 이미 학교 급식에 공급 중. 이제 장단콩·채소류 등 파주산 식재료 전반으로 확대하여 농가 약 1만 8천호의 판로를 넓히고, 아이들 먹거리 안전도 함께 높이겠습니다.</div>
+      <div class="edu-timeline-row">
+        <span class="edu-year y1">1년차: 납품농가 위생·안전 인증 체계 구축 및 참여 농가 모집</span>
+      </div>
+      <div class="edu-timeline-row">
+        <span class="edu-year y2">2년차: 학교 영양사 직납 온라인 플랫폼 오픈 및 시범 운영</span>
+      </div>
+      <div class="edu-timeline-row">
+        <span class="edu-year y3">3년차: 파주산 식재료 급식 비율 목표치 달성</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ⅱ. 신나는 학교 -->
+  <div class="edu-section">
+    <div class="edu-section-header fun">
+      <h3>Ⅱ. 신나는 학교</h3>
+      <div class="desc">입시에 지친 파주 학생들에게 하고 싶은 것을 마음껏 할 수 있는 학교생활을 돌려주겠습니다. 학생이 주인공인 학교를 만들겠습니다.</div>
+    </div>
+
+    <div class="edu-pledge fun">
+      <h4><span class="pledge-num">④</span>학생 동아리(정규·자율) 지원 — 하고 싶은 걸 마음껏</h4>
+      <div class="pledge-desc">현재 학교의 동아리별 예산은 연간 10만 원 안팎으로 턱없이 부족합니다. 파주의 학생들이 스스로 원하는 활동을 마음껏 펼칠 수 있도록 파주시가 직접 지원하겠습니다.</div>
+      <ul class="pledge-items">
+        <li>5명 이상 학생이 동아리 구성 후 예산서 제출 시 <strong>연간 최대 100만 원 지원</strong></li>
+        <li>인원 규모가 큰 경우 특별 심사를 통해 추가 지원 가능</li>
+        <li>학교 밖 동아리, 타교 연합 동아리는 성인 퍼실리테이터 조건으로 지원</li>
+        <li>지원 동아리는 <strong>파주 학생 동아리 축제</strong>(파주시청 주최) 부스 참가 자격 부여 — 공연, 전시, 굿즈 판매 등</li>
+      </ul>
+    </div>
+
+    <div class="edu-pledge fun">
+      <h4><span class="pledge-num">⑤</span>학생자치 지원 — 학생이 주인인 학교</h4>
+      <div class="pledge-desc">학생회가 인기투표에 그치는 것이 아니라 일하는 자치 기구로 작동하도록 파주시가 지원하겠습니다.</div>
+
+      <div class="edu-sub-section">
+        <h5>㉠ 예산정책학교</h5>
+        <ul class="pledge-items" style="padding-left:0;">
+          <li>참여 학생회에 규정 개정, 예산 편성, 행사 주관 등 자치 활동 실무 교육</li>
+          <li>교육 이수 학생회에 축제·체육대회 등 학생회 주관 행사 예산 지원</li>
+        </ul>
+      </div>
+      <div class="edu-sub-section">
+        <h5>㉡ 학생회 공약 공모</h5>
+        <ul class="pledge-items" style="padding-left:0;">
+          <li>학생회 공약 대회 — 우수 공약에 이행 지원금 지급</li>
+          <li>공약 이행 우수학교 포상 및 학생회 굿즈 지원</li>
+        </ul>
+      </div>
+      <div class="edu-sub-section">
+        <h5>㉢ 학생회 전용 앱 제작·배포</h5>
+        <ul class="pledge-items" style="padding-left:0;">
+          <li>학생회 커뮤니티, 공지 알림, 지식 나눔 등 정보와 소통 기능 앱</li>
+          <li>파주 지역 학생회 네트워크 형성 — 상호 교류, 이해와 협력</li>
+          <li>지식 나눔: 학업·학교생활 질문 답변, 활동 시 포인트 누적 → <strong>파주페이 전환</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ⅲ. 똑똑한 학교 -->
+  <div class="edu-section">
+    <div class="edu-section-header smart">
+      <h3>Ⅲ. 똑똑한 학교</h3>
+      <div class="desc">AI 시대 교육의 핵심은 공부 잘하는 것이 아닙니다. 문제를 찾아내고 해결할 줄 아는 아이로 키우는 것이 핵심입니다. 순응하는 노동자가 아니라 질문하는 주권자로 성장하게 하겠습니다.</div>
+    </div>
+
+    <div class="edu-pledge smart">
+      <h4><span class="pledge-num">⑥</span>파주시장배 AI 활용 경진대회</h4>
+      <div class="pledge-desc">AI 활용 능력은 이제 생존을 위한 필수 능력입니다. AI를 이용하여 현실의 크고 작은 문제를 해결하는 경험을 공유함으로써 참가 자체가 교육과정이 되게 하겠습니다.</div>
+      <ul class="pledge-items">
+        <li>파주 지역 현안을 비롯한 다양한 과제 — AI를 활용해 문제를 정의하고 해결책 제안</li>
+        <li>파주 학생 누구나 참가 가능하며, <strong>우수 아이디어는 실제 시정에 반영 검토</strong></li>
+      </ul>
+    </div>
+
+    <div class="edu-pledge smart">
+      <h4><span class="pledge-num">⑦</span>학생 정책(교육·일반) 상시 공모 — 내 이름의 정책 만들기</h4>
+      <div class="pledge-desc">정책에 참여한다는 것은 문제를 해결하겠다는 것입니다. 학생이 낸 아이디어가 실제 파주시 교육 정책이 되는 경험 — 그것이 주권자로 성장하는 길입니다.</div>
+      <ul class="pledge-items">
+        <li>교육 관련 혹은 일반 정책 아이디어 상시 접수 (온라인, 연중무휴)</li>
+        <li>월별 우수 아이디어 선정 및 포상</li>
+        <li>월별 수상작 → 연말 시민 투표 → 대상 선정 → <strong>정책 반영</strong></li>
+        <li>채택된 정책에 학생 이름 부착 (예: 'OOO 조례', 'OOO 정책')</li>
+        <li>가능한 정책·불가능한 정책을 구분하고 참여하는 것이 민주시민교육</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 교육공약 예산/실행 요약 -->
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>💰 주요 예산 추정 및 실행 가능성</h3>
+      <table class="policy-table" style="margin-top:8px;">
+        <thead><tr><th>공약</th><th>예산 규모</th><th>실행 가능성</th></tr></thead>
+        <tbody>
+          <tr><td>① 파프리카 확대</td><td>기존 사업 확장</td><td><div class="progress-bar"><div class="progress-fill" style="width:90%;background:#2e7d32;"></div></div></td></tr>
+          <tr><td>② 실내 공기질 IoT</td><td>~20억 원</td><td><div class="progress-bar"><div class="progress-fill" style="width:85%;background:#2e7d32;"></div></div></td></tr>
+          <tr><td>③ 로컬푸드 급식</td><td>단계별 편성</td><td><div class="progress-bar"><div class="progress-fill" style="width:70%;background:#ff6f00;"></div></div></td></tr>
+          <tr><td>④ 동아리 지원</td><td>동아리당 100만 원</td><td><div class="progress-bar"><div class="progress-fill" style="width:95%;background:#2e7d32;"></div></div></td></tr>
+          <tr><td>⑤ 학생자치/앱</td><td>앱 개발 + 운영비</td><td><div class="progress-bar"><div class="progress-fill" style="width:90%;background:#2e7d32;"></div></div></td></tr>
+          <tr><td>⑥ AI 경진대회</td><td>연 1회 행사비</td><td><div class="progress-bar"><div class="progress-fill" style="width:95%;background:#2e7d32;"></div></div></td></tr>
+          <tr><td>⑦ 정책 상시 공모</td><td>포상금 + 운영비</td><td><div class="progress-bar"><div class="progress-fill" style="width:95%;background:#2e7d32;"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>🎯 교육공약 키워드 분포</h3>
+      <div class="chart-container"><canvas id="eduBarChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- 인사이트 박스 -->
+  <div class="insight-box" style="margin-top:20px;">
+    <h4>💡 교육공약 핵심 인사이트</h4>
+    <ul style="list-style:none;padding:0;">
+      <li style="padding:6px 0;font-size:0.9rem;"><strong>파프리카 실적 기반:</strong> 전국 최초 통학순환버스 연 25만 명 이용 → 안전 공약의 신뢰도 확보</li>
+      <li style="padding:6px 0;font-size:0.9rem;"><strong>전국 최초 IoT 공기질:</strong> 교실당 100만 원 수준, 전체 ~20억 원 → 학부모 안심 + 이슈 선점</li>
+      <li style="padding:6px 0;font-size:0.9rem;"><strong>학생자치 핵심 전략:</strong> 예산정책학교 + 학생회 앱 + 파주페이 연동 → 20대 초반까지 인기 예상</li>
+      <li style="padding:6px 0;font-size:0.9rem;"><strong>AI 시대 대응:</strong> 경진대회 + 정책 공모로 문제해결형 인재 육성 → 미래 교육 비전 선점</li>
+      <li style="padding:6px 0;font-size:0.9rem;"><strong>타겟:</strong> 학생 유권자(19~20대 초반) + 학부모(30~50대) — 안전/신나는/똑똑한 3축 밸런스</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- =============== TAB 7: 전략 제안 =============== -->
+<div class="tab-panel" id="tab7">
   <div class="card" style="margin-bottom:20px;">
     <h3>🎯 8대 보완 전략</h3>
     <div class="grid grid-2" style="margin-top:12px;">
@@ -968,6 +1199,36 @@ chartInstances['timelineChart'] = new Chart(document.getElementById('timelineCha
     ]
   },
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{max:100,ticks:{display:false}},x:{grid:{display:false}}}}
+});
+
+// 교육공약 레이더 차트
+chartInstances['eduRadar'] = new Chart(document.getElementById('eduRadar'), {
+  type:'radar',
+  data:{
+    labels:['통학 안전','공기질 안전','급식 안전','동아리 지원','학생자치','AI 활용','정책 참여'],
+    datasets:[{
+      label:'교육공약 범위',
+      data:[90,85,70,80,95,75,85],
+      borderColor:'#2e7d32',backgroundColor:'rgba(46,125,50,0.15)',pointBackgroundColor:['#2e7d32','#2e7d32','#2e7d32','#ff6f00','#ff6f00','#1565c0','#1565c0'],
+      borderWidth:2,pointRadius:5
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:20},pointLabels:{font:{size:11}}}},plugins:{legend:{display:false}}}
+});
+
+// 교육공약 키워드 바 차트
+chartInstances['eduBarChart'] = new Chart(document.getElementById('eduBarChart'), {
+  type:'bar',
+  data:{
+    labels:['안전·보건','학생자치·민주시민','AI·미래교육','로컬푸드·농가','디지털·IoT','학생복지·지원','시민참여'],
+    datasets:[{
+      label:'관련도',
+      data:[92,95,80,65,85,88,82],
+      backgroundColor:['#2e7d32','#ff6f00','#1565c0','#8bc34a','#00bcd4','#ff9800','#7b1fa2'],
+      borderRadius:6
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:11}}}}}
 });
 
 // 페이지 로드 시 대시보드 데이터 자동 적용

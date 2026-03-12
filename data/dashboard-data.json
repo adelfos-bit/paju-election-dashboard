@@ -82,14 +82,14 @@
   },
   "collection_status": {
     "social_last_success": "2026-03-02T16:45:46.370658",
-    "news_last_success": "2026-03-02T16:45:46.564640",
-    "news_articles_collected": 0
+    "news_last_success": "2026-03-11T18:02:22.364172",
+    "news_articles_collected": 32
   },
-  "last_updated": "2026-03-02",
+  "last_updated": "2026-03-11",
   "election_date": "2026-06-03",
   "header": {
-    "update_date": "2026.03.02",
-    "d_day": 93,
+    "update_date": "2026.03.11",
+    "d_day": 84,
     "voters": "~45만 명"
   },
   "issue_interest": {
@@ -104,16 +104,84 @@
       "문화/관광"
     ],
     "data": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
+      46,
+      6,
+      100,
+      15,
+      15,
+      16,
+      34,
+      14
     ]
   },
-  "media_exposure": {},
-  "sentiment_details": {}
+  "media_exposure": {
+    "김경일": 47,
+    "고준호": 100,
+    "손배찬": 11,
+    "이용욱": 11
+  },
+  "sentiment_details": {
+    "김경일": {
+      "positive": 56,
+      "neutral": 22,
+      "negative": 22,
+      "score": 34,
+      "article_count": 9,
+      "sample_positive": [],
+      "sample_negative": []
+    },
+    "고준호": {
+      "positive": 61,
+      "neutral": 11,
+      "negative": 28,
+      "score": 33,
+      "article_count": 19,
+      "sample_positive": [],
+      "sample_negative": []
+    },
+    "손배찬": {
+      "positive": 0,
+      "neutral": 100,
+      "negative": 0,
+      "score": 0,
+      "article_count": 2,
+      "sample_positive": [],
+      "sample_negative": []
+    },
+    "이용욱": {
+      "positive": 50,
+      "neutral": 50,
+      "negative": 0,
+      "score": 50,
+      "article_count": 2,
+      "sample_positive": [],
+      "sample_negative": []
+    }
+  },
+  "sentiment": {
+    "김경일": {
+      "positive": 56,
+      "neutral": 22,
+      "negative": 22,
+      "score": 34
+    },
+    "고준호": {
+      "positive": 61,
+      "neutral": 11,
+      "negative": 28,
+      "score": 33
+    },
+    "손배찬": {
+      "positive": 0,
+      "neutral": 100,
+      "negative": 0,
+      "score": 0
+    },
+    "이용욱": {
+      "positive": 50,
+      "neutral": 50,
+      "negative": 0,
+      "score": 50
+    }
+  }
 }

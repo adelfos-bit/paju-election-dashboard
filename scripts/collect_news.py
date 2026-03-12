@@ -36,17 +36,39 @@ CANDIDATE_NAMES = [
 
 ELECTION_DATE = datetime(2026, 6, 3)
 
-# 감성분석용 키워드 사전
-POSITIVE_WORDS = [
-    "성과", "확대", "지원", "개선", "혁신", "추진", "발전", "강화", "협력", "합의",
-    "기대", "호평", "성공", "약속", "비전", "공약", "계획", "도약", "상승", "선두",
-    "지지", "환영", "긍정", "돌파", "활성화", "투자", "유치", "개통", "착공", "완공"
-]
-NEGATIVE_WORDS = [
-    "논란", "비판", "실패", "갈등", "반발", "의혹", "문제", "위기", "우려", "지적",
-    "반대", "거부", "파문", "사퇴", "고발", "기소", "수사", "부정", "비리", "하락",
-    "폭로", "규탄", "항의", "불만", "좌절", "지연", "무산", "철회", "중단", "파행"
-]
+# 감성분석용 키워드 사전 (가중치 적용)
+POSITIVE_WORDS = {
+    # 강한 긍정 (가중치 2)
+    "성과": 2, "성공": 2, "혁신": 2, "도약": 2, "선두": 2, "압승": 2,
+    "돌파": 2, "쾌거": 2, "약진": 2, "호평": 2, "찬사": 2,
+    # 정책/공약 긍정 (가중치 1) — 정책 발표·제안 패턴 인식
+    "발표": 1, "제안": 1, "도입": 1, "절감": 1, "전환": 1, "승부수": 1,
+    "매니페스토": 1, "정책": 1, "시민": 1, "해법": 1, "구상": 1,
+    "무상": 1, "감면": 1, "인하": 1, "혜택": 1, "복원": 1,
+    # 일반 긍정 (가중치 1)
+    "확대": 1, "지원": 1, "개선": 1, "추진": 1, "발전": 1, "강화": 1,
+    "협력": 1, "합의": 1, "기대": 1, "약속": 1, "비전": 1, "공약": 1,
+    "계획": 1, "상승": 1, "지지": 1, "환영": 1, "긍정": 1, "활성화": 1,
+    "투자": 1, "유치": 1, "개통": 1, "착공": 1, "완공": 1, "출마선언": 1,
+    "차별화": 1, "전략": 1, "준비": 1, "행보": 1, "의지": 1, "소신": 1,
+    "현장": 1, "공감": 1, "열정": 1, "신뢰": 1, "경험": 1, "전문성": 1,
+    "역량": 1, "리더십": 1, "소통": 1, "변화": 1, "개혁": 1
+}
+NEGATIVE_WORDS = {
+    # 강한 부정 (가중치 2)
+    "비리": 2, "기소": 2, "구속": 2, "파문": 2, "폭로": 2, "규탄": 2,
+    "부정": 2, "위법": 2, "탄핵": 2, "파행": 2,
+    # 일반 부정 (가중치 1)
+    "논란": 1, "비판": 1, "실패": 1, "갈등": 1, "반발": 1, "의혹": 1,
+    "문제": 1, "위기": 1, "우려": 1, "지적": 1, "반대": 1, "거부": 1,
+    "고발": 1, "수사": 1, "하락": 1, "항의": 1, "불만": 1, "좌절": 1,
+    "지연": 1, "무산": 1, "철회": 1, "중단": 1, "불화": 1,
+    "경고": 1, "난항": 1, "혼란": 1, "분열": 1, "탈당": 1, "불출마": 1,
+    "사생활": 1, "의문": 1, "부실": 1, "허위": 1, "과대": 1
+}
+
+# 문맥 분석 범위 (후보명 주변 글자 수)
+CONTEXT_WINDOW = 80
 
 # 이슈 카테고리 매핑
 ISSUE_CATEGORIES = {
@@ -147,18 +169,83 @@ def collect_articles(client_id, client_secret, keywords, period_start, period_en
     return articles
 
 
-def analyze_sentiment(text):
-    """키워드 기반 감성분석"""
-    pos_count = sum(1 for w in POSITIVE_WORDS if w in text)
-    neg_count = sum(1 for w in NEGATIVE_WORDS if w in text)
-    total = pos_count + neg_count
+def _is_resignation_to_run(text):
+    """'사퇴/사직'이 출마를 위한 사직인지 판별 (출마 문맥이면 True → 부정 아님)"""
+    RUN_CONTEXT = ["출마", "도전", "선거", "후보", "경선", "의원직"]
+    if "사퇴" in text or "사직" in text:
+        return any(kw in text for kw in RUN_CONTEXT)
+    return False
+
+
+# 범용 부정어 — 후보와 직접 관련이 아닐 수 있어 근접도 체크 필요
+AMBIGUOUS_NEGATIVES = {"논란", "반발", "의혹", "문제", "우려", "지적", "비판", "위기", "갈등"}
+PROXIMITY_WINDOW = 30  # 범용 부정어 근접도 체크 범위 (글자 수)
+
+
+def _count_neg_with_proximity(text, candidate_name=None):
+    """부정 점수 계산 — 범용 부정어는 후보명 근접 시에만 카운트"""
+    neg_score = 0
+    for word, weight in NEGATIVE_WORDS.items():
+        if word not in text:
+            continue
+        if candidate_name and word in AMBIGUOUS_NEGATIVES:
+            word_idx = 0
+            word_near_candidate = False
+            while True:
+                pos = text.find(word, word_idx)
+                if pos == -1:
+                    break
+                check_start = max(0, pos - PROXIMITY_WINDOW)
+                check_end = min(len(text), pos + len(word) + PROXIMITY_WINDOW)
+                if candidate_name in text[check_start:check_end]:
+                    word_near_candidate = True
+                    break
+                word_idx = pos + 1
+            if word_near_candidate:
+                neg_score += weight
+        else:
+            neg_score += weight
+    return neg_score
+
+
+def analyze_sentiment(text, candidate_name=None):
+    """가중치 키워드 기반 감성분석 — 긍정/부정/중립 점수 반환"""
+    pos_score = sum(weight for word, weight in POSITIVE_WORDS.items() if word in text)
+    neg_score = _count_neg_with_proximity(text, candidate_name)
+
+    # 문맥 보정: 출마를 위한 사퇴/사직은 부정에서 제외
+    if _is_resignation_to_run(text):
+        pass  # 이미 사전에서 제거했으므로 추가 처리 불필요
+
+    total = pos_score + neg_score
     if total == 0:
-        return {"positive": 0, "negative": 0, "neutral": 1}
+        return {"positive": 0, "negative": 0, "neutral": 1, "score": 0}
     return {
-        "positive": pos_count / total,
-        "negative": neg_count / total,
-        "neutral": 0
+        "positive": pos_score / total,
+        "negative": neg_score / total,
+        "neutral": 0,
+        "score": pos_score - neg_score
     }
+
+
+def analyze_sentiment_context(text, candidate_name):
+    """문맥 기반 감성분석 — 후보명 주변 텍스트만 분석"""
+    contexts = []
+    idx = 0
+    while True:
+        pos = text.find(candidate_name, idx)
+        if pos == -1:
+            break
+        start = max(0, pos - CONTEXT_WINDOW)
+        end = min(len(text), pos + len(candidate_name) + CONTEXT_WINDOW)
+        contexts.append(text[start:end])
+        idx = pos + 1
+
+    if not contexts:
+        return analyze_sentiment(text, candidate_name)
+
+    combined = " ".join(contexts)
+    return analyze_sentiment(combined, candidate_name)
 
 
 def analyze_articles(articles):
@@ -174,7 +261,7 @@ def analyze_articles(articles):
 
         for name in article["candidates_mentioned"]:
             candidate_counter[name] += 1
-            sent = analyze_sentiment(text)
+            sent = analyze_sentiment_context(text, name)
             candidate_sentiment[name]["pos"] += sent["positive"]
             candidate_sentiment[name]["neg"] += sent["negative"]
             candidate_sentiment[name]["total"] += 1
@@ -401,8 +488,10 @@ def main():
         period_start = period_start.replace(day=1)
         period_end = report_date.replace(hour=23, minute=59, second=59)
 
-    period_start = period_start.astimezone() if period_start.tzinfo else period_start
-    period_end = period_end.astimezone() if period_end.tzinfo else period_end
+    if not period_start.tzinfo:
+        period_start = period_start.astimezone()
+    if not period_end.tzinfo:
+        period_end = period_end.astimezone()
 
     print(f"[정보] {args.type} {'데이터 갱신' if args.type == 'hourly' else '보고서 생성'}: {period_start.date()} ~ {period_end.date()}")
     print(f"[정보] 키워드 {len(ALL_KEYWORDS)}개로 검색 시작...")
